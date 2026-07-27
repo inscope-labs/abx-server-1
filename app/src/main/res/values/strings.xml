@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ABX</string>
+
+    <!-- Recovery Screen Strings -->
+    <string name="recovery_title">Startup Safeguard</string>
+    <string name="recovery_subtitle">A critical problem was encountered during startup. Rest assured, your data is safe. Please copy this report and share it with support.</string>
+    <string name="recovery_stage_label">Failure Stage</string>
+    <string name="recovery_message_label">Failure Message</string>
+    <string name="recovery_device_label">Device Metadata</string>
+    <string name="recovery_stack_label">Stack Trace</string>
+    <string name="recovery_copy_button">Copy Report</string>
+    <string name="recovery_retry_button">Restart App</string>
+    <string name="recovery_unknown_stage">Unknown Stage</string>
+    <string name="recovery_unknown_message">No message was specified in the failure.</string>
+    <string name="recovery_copied">Diagnostic report copied to clipboard</string>
+
+    <string name="crash_title">Something Went Wrong</string>
+    <string name="crash_subtitle">The app hit an unexpected error and had to close that screen. Your data is safe. Please copy this report and share it with support.</string>
+    <string name="crash_type_label">Exception Type</string>
+    <string name="crash_message_label">Error Message</string>
+    <string name="crash_device_label">Device Metadata</string>
+    <string name="crash_stack_label">Stack Trace</string>
+    <string name="crash_copy_button">Copy Report</string>
+    <string name="crash_restart_button">Restart App</string>
+    <string name="crash_unknown_type">Unknown Exception</string>
+    <string name="crash_unknown_message">No message was provided with this error.</string>
+    <string name="crash_copied">Crash report copied to clipboard</string>
+
+    <!-- ABX Enrollment Strings -->
+    <string name="title_enrollment">ABX Enrollment</string>
+    <string name="section_device_identity">Device Identity</string>
+    <string name="section_verification">Verification</string>
+    <string name="section_security_status">Security Status</string>
+    <string name="section_enclave_actions">Hardware-Backed Actions</string>
+    <string name="label_fingerprint_title">Device Fingerprint (SHA-256)</string>
+    <string name="btn_copy_fingerprint">Copy fingerprint</string>
+    <string name="btn_view_full">View Full Fingerprint</string>
+    <string name="btn_hide_full">Hide Full Fingerprint</string>
+    <string name="msg_fingerprint_copied">Fingerprint copied to clipboard</string>
+    <string name="label_scan_to_enroll">Scan to Enroll Device</string>
+    <string name="desc_verification_instruction">Present this QR code to the gateway or server to enroll this secure device.</string>
+    <string name="label_hardware_enclave">Hardware Enclave Status</string>
+    <string name="label_provider_backend">Provider Backend</string>
+    <string name="label_key_isolation">Key Material Isolation</string>
+    <string name="label_hardware_backed">Hardware Backed (TEE)</string>
+    <string name="label_strongbox_support">StrongBox Support</string>
+    <string name="val_android_keystore">Android KeyStore (Hardware Secured)</string>
+    <string name="val_jvm_sandbox">JVM Sandbox (Test Environment)</string>
+    <string name="val_key_isolation_text">NON-EXPORTABLE (Private key locked in HSM)</string>
+    <string name="val_hardware_backed_yes">YES (Cryptographic actions restricted to chip)</string>
+    <string name="val_hardware_backed_no">NO (TEE fallback unavailable)</string>
+    <string name="val_strongbox_yes">YES (Discrete Hardware Security Module)</string>
+    <string name="btn_rotate_key">Rotate Secure Keypair</string>
+    <string name="btn_pairing">Gateway Pairing</string>
+    <string name="btn_local_bridge">Local Bridge</string>
+    <string name="btn_clear_credentials">Clear Credentials &amp; Deconstruct Identity</string>
+    <string name="msg_keys_cleared">Secure keys successfully cleared and deconstructed.</string>
+    <string name="msg_rotated_success">New EC-256 device credential keypair rotated successfully.</string>
+    <string name="msg_secure_active">Secure keypair active.</string>
+    <string name="msg_init_failed">Credential initialization failed: %1$s</string>
+    <string name="btn_about_info">About &amp; Privacy Policy</string>
+    <string name="btn_close">Close</string>
+    <string name="error_state_title">Secure Identity Initialization Failed</string>
+    <string name="error_state_desc">The application was unable to establish a secure, hardware-backed identity key pair. This might occur if hardware cryptography is restricted or the secure enclave is temporarily locked.</string>
+    <string name="btn_retry_initialization">Retry Initialization</string>
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_connect">Connect</string>
+    <string name="tab_access">Access</string>
+    <string name="tab_activity">Activity</string>
+    <string name="tab_toolbox">Toolbox</string>
+    <string name="tab_remove">Remove</string>
+    <string name="btn_start_session">Start Session</string>
+    <string name="btn_stop_session">Stop Session</string>
+    <string name="ttl_display">Time Remaining: %1$d seconds</string>
+    <string name="ttl_inactive">Session Inactive</string>
+    <string name="policy_summary_title">Allowed Actions &amp; Folders</string>
+    <string name="policy_summary_desc">When a session is active, your authorized AI assistant is granted scoped permissions:</string>
+    <string name="policy_summary_details">✓ Read Files\n✓ Write &amp; Save Files\n\nAuthorized Directories:\n• Downloads (/storage/emulated/0/Download)\n• Documents (/storage/emulated/0/Documents)</string>
+    <string name="policy_inactive_desc">No active session. Your assistant has zero access to any files on this device.</string>
+    <string name="advanced_toggle">Advanced Technical Details</string>
+    <string name="audit_title">Security Activity Logs</string>
+    <string name="audit_subtitle">Chronological ledger of security policy validations and unauthorized block events.</string>
+    <string name="audit_empty">No security block events or rejections recorded yet.</string>
+    <string name="audit_integrity_valid">Log Chain Integrity: SECURE (Hardware Key Attested)</string>
+    <string name="audit_integrity_invalid">Log Chain Integrity: CORRUPTED / TAMPERED</string>
+    <string name="uninstall_instructions_title">Uninstalling ABX</string>
+    <string name="uninstall_instructions_desc">To fully and permanently remove all data from ABX, simply uninstall the application.\n\nUnder Android\'s File-Based Encryption (FBE) model, all isolated credentials, in-memory states, sandbox files, and log databases are completely and irrecoverably purged from hardware memory upon uninstallation.</string>
+    <string name="clear_explanation">You can also manually wipe the security key pair immediately using the button below. This instantly invalidates any currently issued capability tokens and prevents any future authorization checks.</string>
+    <string name="btn_clear_data">Deconstruct Secure Identity Now</string>
+    <string name="mock_pairing_button">Simulate Gateway Enrollment</string>
+    <string name="mock_pairing_title">Mock Gateway Enrollment</string>
+    <string name="mock_pairing_prompt">Enter gateway pairing token or click Enroll:</string>
+    <string name="dialog_enroll_success">Device enrolled and paired successfully!</string>
+
+    <!-- Options Menu Strings -->
+    <string name="menu_diagnostics">Diagnostics</string>
+    <string name="menu_utilities">Utilities</string>
+    <string name="menu_utilities_toast">Utilities clicked</string>
+    <string name="menu_about">About</string>
+    <string name="menu_privacy_policy">Privacy Policy</string>
+    <string name="menu_delete_data">Data Deletion</string>
+
+    <string name="error_title">Something went wrong</string>
+    <string name="error_message">The app ran into an unexpected problem and needs to restart. Your data is safe.</string>
+    <string name="error_reference_format">Reference: %1$s</string>
+    <string name="error_unknown_reference">unavailable</string>
+    <string name="error_restart_button">Restart App</string>
+    <string name="error_restart_failed">Failed to restart application</string>
+    <string name="error_share_button">Send Diagnostic Report</string>
+    <string name="error_share_subject">ABX Server error report (%1$s)</string>
+    <string name="error_share_body">Reference code: %1$s\n\nFull diagnostic details:\n\n%2$s</string>
+    <string name="error_share_chooser_title">Send report via</string>
+    <string name="error_share_failed">Failed to share diagnostic report</string>
+    <string name="error_fallback_toast">An error occurred displaying this screen. Please restart the app.</string>
+
+    <!-- Context Package Strings -->
+    <string name="context_package_title">Context Package</string>
+    <string name="context_package_desc">Compile and package local files/folders as context for AI/MCP clients.</string>
+    <string name="add_files">Add Files</string>
+    <string name="add_folder">Add Folder</string>
+    <string name="empty_selection">No items selected. Add files or folders to compile a package.</string>
+    <string name="token_budget">Estimated: %1$s / %2$s tokens</string>
+    <string name="build_package">Build Package</string>
+    <string name="success_header">Context Package Compiled</string>
+    <string name="done">Done</string>
+    <string name="view_in_files">View in Files</string>
+    <string name="skipped_files_warning">Some files were skipped due to size limits, binary format, or security policies.</string>
+
+    <!-- Workspace Switcher & Tab Strings -->
+    <string name="label_workspace">Workspace</string>
+    <string name="label_server">Server</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_chat">Chat</string>
+    <string name="tab_tools">Tools</string>
+    <string name="tab_userdb">UserDB</string>
+    <string name="userdb_placeholder">UserDB tools are coming soon.</string>
+
+    <!-- Chat -->
+    <string name="chat_title">Chat</string>
+    <string name="chat_new_session">New chat</string>
+    <string name="chat_settings">Chat settings</string>
+    <string name="chat_api_key_missing">No API key set for this provider — tap to add one</string>
+    <string name="chat_empty_state_title">Start a conversation</string>
+    <string name="chat_empty_state_subtitle">Ask a question to get going.</string>
+    <string name="chat_typing_indicator">Assistant is typing…</string>
+    <string name="chat_input_hint">Message</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_cancel">Stop</string>
+    <string name="chat_assistant_label">Assistant</string>
+    <string name="chat_assistant_error_label">Assistant · error</string>
+    <string name="chat_settings_title">Chat settings</string>
+    <string name="chat_settings_provider_label">Provider</string>
+    <string name="chat_settings_model_label">Model</string>
+    <string name="chat_settings_api_key_label">API key</string>
+    <string name="chat_settings_api_key_hint">Paste API key</string>
+    <string name="chat_settings_key_stored">A key is already saved for this provider. Leave blank to keep it.</string>
+    <string name="chat_settings_cancel">Cancel</string>
+    <string name="chat_settings_save">Save</string>
+</resources>

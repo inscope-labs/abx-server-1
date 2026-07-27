@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/color_surface"
+    android:padding="@dimen/spacing_lg">
+
+    <!-- Bottom Sheet Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/top_bar_height"
+        android:layout_marginBottom="@dimen/spacing_md">
+
+        <TextView
+            android:id="@+id/tvBottomSheetTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:textAppearance="@style/TextAppearance.Abx.TitleMedium" />
+
+        <Button
+            android:id="@+id/btnBottomSheetClose"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="Close"
+            android:textColor="@color/color_primary" />
+    </RelativeLayout>
+
+    <View
+        style="@style/Widget.Abx.ListRow.Divider"
+        android:layout_marginBottom="@dimen/spacing_md" />
+
+    <!-- Scrollable compliance HTML reader -->
+    <android.webkit.WebView
+        android:id="@+id/webViewBottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

@@ -1,0 +1,249 @@
+name: Build Debug APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  debug-build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Bump version
+        shell: bash
+        run: |
+          CURRENT_CODE=$(grep -m1 'versionCode' version.properties | cut -d'=' -f2 | tr -d ' ')
+          CURRENT_DEBUG=$(grep -m1 'versionDebug' version.properties | cut -d'=' -f2 | tr -d ' ')
+          NEW_CODE=$((CURRENT_CODE + 1))
+          NEW_DEBUG=$((CURRENT_DEBUG + 1))
+          sed -i "s/^versionCode=.*/versionCode=$NEW_CODE/" version.properties
+          sed -i "s/^versionDebug=.*/versionDebug=$NEW_DEBUG/" version.properties
+          echo "NEW_VERSION_CODE=$NEW_CODE" >> "$GITHUB_ENV"
+          echo "NEW_VERSION_DEBUG=$NEW_DEBUG" >> "$GITHUB_ENV"
+          echo "Bumped versionCode -> $NEW_CODE, versionDebug -> $NEW_DEBUG"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.6.1"
+
+      - name: Initialize build log & display build info
+        shell: bash
+        run: |
+          mkdir -p build-logs/debug diagnostics/manifest diagnostics/apk diagnostics/reports
+          LOGFILE="build-logs/debug/debug-$(date -u +%Y-%m-%dT%H-%M-%SZ)-run${{ github.run_id }}.log"
+          echo "LOGFILE=$LOGFILE" >> "$GITHUB_ENV"
+          VERSION_CODE=$(grep -m1 'versionCode' version.properties | cut -d'=' -f2 | tr -d ' ')
+          VERSION_NAME="$(grep -m1 'versionMajor' version.properties | cut -d'=' -f2 | tr -d ' ').$(grep -m1 'versionMinor' version.properties | cut -d'=' -f2 | tr -d ' ').$(grep -m1 'versionDebug' version.properties | cut -d'=' -f2 | tr -d ' ')"
+          {
+            echo "===== BUILD INFO ====="
+            echo "Run ID:       ${{ github.run_id }}"
+            echo "Commit SHA:   ${{ github.sha }}"
+            echo "Ref:          ${{ github.ref }}"
+            echo "Triggered by: ${{ github.actor }}"
+            echo "Timestamp:    $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "versionCode:  $VERSION_CODE"
+            echo "versionName:  $VERSION_NAME"
+            echo "======================="
+            echo ""
+          } | tee "$LOGFILE"
+
+      - name: Android Lint
+        id: lint
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          gradle --no-daemon :app:lintDebug --stacktrace --warning-mode all 2>&1 | tee diagnostics/reports/lint.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          set -e
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "✅ **Android Lint**: passed" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ **Android Lint**: FAILED (exit $EXIT_CODE) — see diagnostics/reports/lint.log in the abx-server-debug-diagnostics artifact" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 40 diagnostics/reports/lint.log >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: ktlint
+        id: ktlint
+        continue-on-error: true
+        shell: bash
+        run: |
+          if find . -name "*.gradle*" | xargs grep -q ktlint; then
+            set +e
+            gradle --no-daemon ktlintCheck --stacktrace 2>&1 | tee diagnostics/reports/ktlint.log
+            EXIT_CODE=${PIPESTATUS[0]}
+            set -e
+            if [ "$EXIT_CODE" -eq 0 ]; then
+              echo "✅ **ktlint**: passed" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "❌ **ktlint**: FAILED (exit $EXIT_CODE) — see diagnostics/reports/ktlint.log in the abx-server-debug-diagnostics artifact" >> "$GITHUB_STEP_SUMMARY"
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+              tail -n 40 diagnostics/reports/ktlint.log >> "$GITHUB_STEP_SUMMARY"
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            echo "ktlint not configured" | tee diagnostics/reports/ktlint.log
+            echo "⚪ **ktlint**: not configured" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: detekt
+        id: detekt
+        continue-on-error: true
+        shell: bash
+        run: |
+          if find . -name "*.gradle*" | xargs grep -q detekt; then
+            set +e
+            gradle --no-daemon detekt --stacktrace 2>&1 | tee diagnostics/reports/detekt.log
+            EXIT_CODE=${PIPESTATUS[0]}
+            set -e
+            if [ "$EXIT_CODE" -eq 0 ]; then
+              echo "✅ **detekt**: passed" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "❌ **detekt**: FAILED (exit $EXIT_CODE) — see diagnostics/reports/detekt.log in the abx-server-debug-diagnostics artifact" >> "$GITHUB_STEP_SUMMARY"
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+              tail -n 40 diagnostics/reports/detekt.log >> "$GITHUB_STEP_SUMMARY"
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            echo "detekt not configured" | tee diagnostics/reports/detekt.log
+            echo "⚪ **detekt**: not configured" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Unit Tests
+        id: unit-tests
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          gradle --no-daemon :app:testDebugUnitTest --stacktrace --warning-mode all 2>&1 | tee diagnostics/reports/unit-tests.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          set -e
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "✅ **Unit Tests**: passed" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ **Unit Tests**: FAILED (exit $EXIT_CODE) — see diagnostics/reports/unit-tests.log in the abx-server-debug-diagnostics artifact" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 40 diagnostics/reports/unit-tests.log >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Generate Dependency Report
+        continue-on-error: true
+        shell: bash
+        run: |
+          gradle --no-daemon :app:dependencies --configuration debugRuntimeClasspath > diagnostics/dependencies.txt
+
+      - name: Build debug APK
+        shell: bash
+        run: |
+          gradle --no-daemon --stacktrace :app:assembleDebug 2>&1 | tee -a "$LOGFILE"
+
+      - name: Verify APK exists
+        shell: bash
+        run: |
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          if [[ ! -f "$APK" ]]; then
+            echo "::error::Expected debug APK not found at $APK"
+            exit 1
+          fi
+          echo "Debug APK built: $APK ($(stat -c%s "$APK") bytes)"
+
+      - name: Collect Manifest Diagnostics
+        continue-on-error: true
+        shell: bash
+        run: |
+          find app/build -path "*merged_manifests*" -type f -exec cp {} diagnostics/manifest/ \;
+
+      - name: Inspect APK Contents
+        continue-on-error: true
+        shell: bash
+        run: |
+          unzip -l app/build/outputs/apk/debug/app-debug.apk > diagnostics/apk/apk-contents.txt
+
+      - name: Summarize warnings and errors
+        shell: bash
+        run: |
+          {
+            echo ""
+            echo "===== WARNING/ERROR SUMMARY ====="
+            grep -iE "warning:|error:|failed|exception" "$LOGFILE" || echo "None found."
+          } >> "$LOGFILE"
+
+      - name: Write build summary
+        shell: bash
+        run: |
+          VERSION_CODE=$(grep -m1 'versionCode' version.properties | cut -d'=' -f2 | tr -d ' ')
+          VERSION_NAME="$(grep -m1 'versionMajor' version.properties | cut -d'=' -f2 | tr -d ' ').$(grep -m1 'versionMinor' version.properties | cut -d'=' -f2 | tr -d ' ').$(grep -m1 'versionDebug' version.properties | cut -d'=' -f2 | tr -d ' ')"
+          {
+            echo "## Build Info"
+            echo "- versionCode: $VERSION_CODE"
+            echo "- versionName: $VERSION_NAME"
+            echo "- Commit: ${{ github.sha }}"
+            echo "- Run: ${{ github.run_id }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: abx-server-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Diagnostics Bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: abx-server-debug-diagnostics
+          path: |
+            diagnostics/
+          retention-days: 14
+
+      - name: Commit build log
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$LOGFILE" version.properties
+          git commit -m "ci: bump version to versionCode=$NEW_VERSION_CODE (versionDebug $NEW_VERSION_DEBUG)" || echo "Nothing to commit"
+
+          MAX_ATTEMPTS=5
+          ATTEMPT=1
+          until git push origin HEAD:main; do
+            if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+              echo "::error::Failed to push version bump after $MAX_ATTEMPTS attempts — version.properties was NOT updated on main. Re-run this workflow."
+              exit 1
+            fi
+            echo "Push rejected (attempt $ATTEMPT/$MAX_ATTEMPTS) — likely a concurrent run updated version.properties first. Retrying with fresh rebase..."
+            git fetch origin main
+            if ! git rebase origin/main; then
+              echo "::error::Rebase conflict on version.properties — resolving by taking the higher versionCode/versionDebug values."
+              git checkout --theirs version.properties 2>/dev/null || true
+              REMOTE_CODE=$(grep -m1 'versionCode' version.properties | cut -d'=' -f2 | tr -d ' ')
+              if [ "$REMOTE_CODE" -ge "$NEW_VERSION_CODE" ]; then
+                echo "Remote already has versionCode $REMOTE_CODE >= our $NEW_VERSION_CODE — skipping our bump, keeping remote's."
+                git rebase --skip || git rebase --abort
+              else
+                git add version.properties
+                git rebase --continue
+              fi
+            fi
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          echo "Version bump pushed successfully: versionCode=$NEW_VERSION_CODE"
