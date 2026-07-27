@@ -17,6 +17,8 @@ dependencies {
   implementation(libs.okhttp)
   implementation(this.project(":core:session"))
   implementation(this.project(":core:audit"))
+  implementation(this.project(":core:mcp"))
+  implementation(this.project(":core:policy"))
   testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.robolectric)

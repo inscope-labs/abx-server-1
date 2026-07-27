@@ -21,7 +21,8 @@ class TunnelManagerImpl(
     private val environment: TunnelEnvironment = TunnelEnvironment.PRODUCTION,
     parentScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
     private val relayUrl: String? = null,
-    @Volatile private var transportProvider: TransportProvider? = null
+    @Volatile private var transportProvider: TransportProvider? = null,
+    private val dispatcher: McpDispatcher? = null
 ) : TunnelManager {
 
     private val supervisorJob = SupervisorJob(parentScope.coroutineContext[Job])
@@ -35,6 +36,7 @@ class TunnelManagerImpl(
 
     private var monitoringJob: Job? = null
     private var reconnectJob: Job? = null
+    private var receiveJob: Job? = null
 
     init {
         _stateFlow.value = determineInitialState()
@@ -119,6 +121,16 @@ class TunnelManagerImpl(
             // Start connection monitoring
             startConnectionMonitoring()
 
+            receiveJob?.cancel()
+            receiveJob = scope.launch {
+                provider.receive().collect { message ->
+                    val response = dispatcher?.dispatch(message)
+                    if (response != null) {
+                        provider.send(response)
+                    }
+                }
+            }
+
             return true
         } else {
             _stateFlow.value = TunnelState.STOPPED
@@ -134,6 +146,8 @@ class TunnelManagerImpl(
         monitoringJob = null
         reconnectJob?.cancel()
         reconnectJob = null
+        receiveJob?.cancel()
+        receiveJob = null
         
         transportProvider?.disconnect()
         _isRunningFlow.value = false
