@@ -7,13 +7,17 @@ import com.inscopelabs.abx.server.core.policy.Capability
 import com.inscopelabs.abx.server.core.policy.PolicyEngine
 import com.inscopelabs.abx.server.core.policy.Request as PolicyRequest
 import com.inscopelabs.abx.server.core.policy.AuthorizationResult
+import com.inscopelabs.abx.server.core.session.Nonce
+import com.inscopelabs.abx.server.core.session.ReplayProtection
 import com.inscopelabs.abx.server.core.session.SessionState
+import com.inscopelabs.abx.server.core.session.ValidationResult
 import org.json.JSONArray
 import org.json.JSONObject
 
 class McpExecutor(
     private val policyEngine: PolicyEngine,
     private val fileSystemReader: FileSystemReader,
+    private val replayProtection: ReplayProtection,
     private val isDebug: Boolean = isRunningInTest()
 ) {
 
@@ -62,6 +66,34 @@ class McpExecutor(
             if (path.isEmpty()) {
                 AuditLog.recordRejection(ReasonCode.PATH_OUT_OF_BOUNDS, token.sessionId, "Path parameter is missing in execute request")
                 return errorResponse(reqId, "Invalid request: 'path' parameter is missing", isMcpStyle = true)
+            }
+
+            val nonceStr = reqObj.optString("nonce", "")
+            val timestampMs = reqObj.optLong("timestamp", -1L)
+            if (nonceStr.isEmpty() || timestampMs < 0L) {
+                AuditLog.recordRejection(ReasonCode.REPLAY_DETECTED, token.sessionId, "Missing nonce or timestamp in request")
+                return errorResponse(reqId, "Invalid request: missing nonce or timestamp", isMcpStyle = true)
+            }
+
+            val validation = replayProtection.validateRequest(
+                nonce = Nonce(nonceStr),
+                timestampMs = timestampMs,
+                currentTimeMs = System.currentTimeMillis(),
+                sessionId = token.sessionId
+            )
+            if (validation != ValidationResult.Success) {
+                // ReplayProtectionImpl already records the audit rejection
+                // internally for these cases — do not log it again here.
+                val message = when (validation) {
+                    is ValidationResult.DuplicateNonce ->
+                        if (isDebug) "Replay protection: duplicate nonce" else "Request rejected"
+                    is ValidationResult.OutsideTimestampWindow ->
+                        if (isDebug) "Replay protection: timestamp outside window (${validation.differenceMs}ms)" else "Request rejected"
+                    is ValidationResult.InvalidSessionState ->
+                        if (isDebug) "Replay protection: session not active (${validation.state})" else "Request rejected"
+                    ValidationResult.Success -> "" // unreachable
+                }
+                return errorResponse(reqId, message, isMcpStyle = true)
             }
 
             // Map method to our handled operations

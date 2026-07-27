@@ -2,6 +2,7 @@ package com.inscopelabs.abx.server.core.mcp
 
 import android.content.Context
 import com.inscopelabs.abx.server.core.policy.PolicyEngineImpl
+import com.inscopelabs.abx.server.core.session.ReplayProtectionProvider
 
 object McpExecutorProvider {
     private var instance: McpExecutor? = null
@@ -12,7 +13,8 @@ object McpExecutorProvider {
         if (current != null) return current
         val newInstance = McpExecutor(
             PolicyEngineImpl(),
-            FileSystemReaderImpl(context.applicationContext)
+            FileSystemReaderImpl(context.applicationContext),
+            ReplayProtectionProvider.get(context.applicationContext)
         )
         instance = newInstance
         return newInstance

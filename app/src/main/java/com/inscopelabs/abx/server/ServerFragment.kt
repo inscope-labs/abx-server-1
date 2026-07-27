@@ -43,6 +43,7 @@ import com.inscopelabs.abx.server.core.mcp.FileSystemReaderImpl
 import com.inscopelabs.abx.server.core.mcp.McpExecutor
 import com.inscopelabs.abx.server.core.policy.Capability
 import com.inscopelabs.abx.server.core.policy.PolicyEngineImpl
+import com.inscopelabs.abx.server.core.session.ReplayProtectionProvider
 import com.inscopelabs.abx.server.core.session.SessionManager
 import com.inscopelabs.abx.server.core.session.SessionManagerProvider
 import com.inscopelabs.abx.server.core.session.SessionState
@@ -139,7 +140,7 @@ class ServerFragment : Fragment(R.layout.fragment_server) {
         sessionManager = SessionManagerProvider.get(requireContext().applicationContext)
         policyEngine = PolicyEngineImpl()
         val fileSystemReader = FileSystemReaderImpl(requireContext().applicationContext)
-        mcpExecutor = McpExecutor(policyEngine, fileSystemReader)
+        mcpExecutor = McpExecutor(policyEngine, fileSystemReader, ReplayProtectionProvider.get(requireContext().applicationContext))
     }
 
     private fun setupGestureDetector(view: View) {
@@ -571,6 +572,8 @@ class ServerFragment : Fragment(R.layout.fragment_server) {
         try {
             reqObj.put("id", 1)
             reqObj.put("jsonrpc", "2.0")
+            reqObj.put("nonce", java.util.UUID.randomUUID().toString())
+            reqObj.put("timestamp", System.currentTimeMillis())
             reqObj.put("method", parsed.operation)
             val paramsObj = JSONObject()
             paramsObj.put("path", parsed.path)

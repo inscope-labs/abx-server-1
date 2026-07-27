@@ -47,6 +47,7 @@ import com.inscopelabs.abx.server.core.audit.AuditLog
 import com.inscopelabs.abx.server.core.audit.ReasonCode
 import com.inscopelabs.abx.server.core.keystore.FingerprintUtils
 import com.inscopelabs.abx.server.core.keystore.KeyStoreManager
+import com.inscopelabs.abx.server.core.session.ReplayProtectionProvider
 import com.inscopelabs.abx.server.core.session.SessionManagerProvider
 import com.inscopelabs.abx.server.core.session.SessionState
 import com.inscopelabs.abx.server.core.session.UserGesture
@@ -103,7 +104,7 @@ fun EnrollmentScreen(
 
     val policyEngine = remember { PolicyEngineImpl() }
     val fileSystemReader = remember { FileSystemReaderImpl(context) }
-    val mcpExecutor = remember { McpExecutor(policyEngine, fileSystemReader) }
+    val mcpExecutor = remember { McpExecutor(policyEngine, fileSystemReader, ReplayProtectionProvider.get(context)) }
 
     var showLocalBridgeDialog by remember { mutableStateOf(false) }
     var bridgeInputText by remember { mutableStateOf("") }
