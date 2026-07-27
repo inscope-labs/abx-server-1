@@ -17,4 +17,8 @@ dependencies {
   implementation(this.project(":core:policy"))
   implementation(this.project(":core:session"))
   implementation(this.project(":core:audit"))
+  testImplementation(libs.junit)
+  testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.robolectric)
+  testImplementation(libs.androidx.core)
 }

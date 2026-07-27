@@ -14,4 +14,8 @@ dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(libs.kotlinx.coroutines.core)
   implementation(this.project(":core:audit"))
+  testImplementation(libs.junit)
+  testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.robolectric)
+  testImplementation(libs.androidx.core)
 }

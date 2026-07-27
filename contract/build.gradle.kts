@@ -3,11 +3,15 @@ plugins {
 }
 
 android {
-  namespace = "com.inscopelabs.abx.server.core.keystore"
+  namespace = "com.inscopelabs.abx.server.contract"
   compileSdk = 36
 
   defaultConfig {
     minSdk = 24
+  }
+
+  buildFeatures {
+    aidl = true
   }
 
   compileOptions {
@@ -18,8 +22,4 @@ android {
 
 dependencies {
   implementation(libs.androidx.core.ktx)
-  testImplementation(libs.junit)
-  testImplementation(libs.kotlinx.coroutines.test)
-  testImplementation(libs.robolectric)
-  testImplementation(libs.androidx.core)
 }

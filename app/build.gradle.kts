@@ -81,6 +81,12 @@ android {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
   }
+
+  testOptions {
+    unitTests {
+      isIncludeAndroidResources = true
+    }
+  }
 }
 
 dependencies {
@@ -124,4 +130,12 @@ dependencies {
   
   // Security Crypto
   implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+  testImplementation(libs.junit)
+  testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.robolectric)
+  testImplementation(libs.androidx.core)
+  androidTestImplementation(libs.androidx.junit)
+  androidTestImplementation(libs.androidx.runner)
+  androidTestImplementation(libs.androidx.espresso.core)
 }

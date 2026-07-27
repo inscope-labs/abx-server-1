@@ -19,4 +19,8 @@ android {
 dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(this.project(":core:keystore"))
+  testImplementation(libs.junit)
+  testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.robolectric)
+  testImplementation(libs.androidx.core)
 }
