@@ -43,7 +43,7 @@ class DispatcherRouter(private val context: Context) {
 
         try {
             val response = withTimeout(TIMEOUT_MS) {
-                suspendCancellableCoroutine { continuation ->
+                val binder = suspendCancellableCoroutine { continuation ->
                     val connection = object : ServiceConnection {
                         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                             if (continuation.isActive) {
@@ -93,7 +93,6 @@ class DispatcherRouter(private val context: Context) {
                         }
                     }
                 }
-            }.let { binder ->
                 val executor = IDispatcherExecutor.Stub.asInterface(binder)
                 executor.execute(request)
             }
