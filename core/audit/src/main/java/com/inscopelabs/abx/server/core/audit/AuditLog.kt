@@ -17,7 +17,8 @@ enum class ReasonCode {
     OP_NOT_ALLOWED,
     SAF_REVOKED,
     TIER_VIOLATION,
-    REQUEST_COUNT_EXCEEDED
+    REQUEST_COUNT_EXCEEDED,
+    DISPATCHER_UNREACHABLE
 }
 
 enum class TunnelAuditEvent {
